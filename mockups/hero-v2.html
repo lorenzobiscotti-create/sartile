@@ -1,0 +1,657 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>helmerge — hero v2</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --frost: #F6F8FC;
+    --slate: #1C2B4A;
+    --teal: #00C4B4;
+    --white: #FFFFFF;
+    --frost-blue: #C8D8EC;
+    --muted-slate: #7A8BA8;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html, body { height: 100%; }
+
+  body {
+    font-family: 'Outfit', sans-serif;
+    background: var(--frost);
+    color: var(--slate);
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+  }
+
+  .hero {
+    position: relative;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 22px 24px 60px;
+    overflow: hidden;
+  }
+
+  /* subtle teal ambient glow */
+  .hero::before {
+    content: "";
+    position: absolute;
+    top: -25%;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 1100px;
+    height: 1100px;
+    background: radial-gradient(circle, rgba(0,196,180,0.12) 0%, rgba(0,196,180,0) 65%);
+    pointer-events: none;
+    z-index: 1;
+  }
+
+  /* ---------- stitch canvas ---------- */
+  #stitchCanvas {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  /* ---------- floating pill nav ---------- */
+  .nav {
+    position: relative;
+    z-index: 5;
+    width: 100%;
+    max-width: 1180px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 24px;
+    padding: 12px 14px 12px 26px;
+    background:
+      linear-gradient(to top, rgba(0,196,180,0.14), rgba(0,196,180,0) 68%),
+      rgba(255,255,255,0.72);
+    backdrop-filter: blur(18px) saturate(160%);
+    -webkit-backdrop-filter: blur(18px) saturate(160%);
+    border: 1px solid var(--frost-blue);
+    border-radius: 999px;
+    box-shadow: 0 14px 40px -20px rgba(28,43,74,0.30);
+  }
+
+  .wordmark {
+    font-weight: 700;
+    font-size: 30px;
+    letter-spacing: -0.025em;
+    color: var(--slate);
+    flex-shrink: 0;
+    cursor: default;
+    transition: opacity 0.2s ease;
+  }
+  .wordmark .m { color: var(--teal); }
+  .wordmark:hover { opacity: 0.7; }
+
+  .nav-links {
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    align-items: center;
+    gap: 30px;
+  }
+  .nav-links a {
+    font-weight: 600;
+    font-size: 15px;
+    color: var(--muted-slate);
+    text-decoration: none;
+    transition: color 0.18s ease;
+  }
+  .nav-links a:hover { color: var(--slate); }
+
+  .nav-right {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-shrink: 0;
+  }
+  .nav-login {
+    font-weight: 600;
+    font-size: 15px;
+    color: var(--slate);
+    text-decoration: none;
+    padding: 10px 16px;
+    border-radius: 999px;
+    transition: background 0.18s ease;
+  }
+  .nav-login:hover { background: rgba(28,43,74,0.06); }
+
+  .nav-cta {
+    font-family: 'Outfit', sans-serif;
+    font-weight: 700;
+    font-size: 15px;
+    color: var(--white);
+    background: var(--slate);
+    border: none;
+    border-radius: 999px;
+    padding: 12px 22px;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    transition: transform 0.15s ease, background 0.18s ease;
+  }
+  .nav-cta:hover { background: #16233d; transform: translateY(-1px); }
+  .nav-cta .arrow { transition: transform 0.2s ease; }
+  .nav-cta:hover .arrow { transform: translateX(3px); }
+
+  /* ---------- hero center ---------- */
+  .stage {
+    position: relative;
+    z-index: 2;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    max-width: 880px;
+    margin: 0 auto;
+    padding-top: 40px;
+  }
+
+  .eyebrow {
+    font-weight: 600;
+    font-size: 13px;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--teal);
+    margin-bottom: 22px;
+    opacity: 0;
+    animation: fadeUp 0.7s ease forwards;
+  }
+
+  .headline {
+    font-weight: 800;
+    font-size: clamp(34px, 4.6vw, 56px);
+    line-height: 1.06;
+    letter-spacing: -0.025em;
+    color: var(--slate);
+    text-align: center;
+    max-width: 22ch;
+    opacity: 0;
+    animation: fadeUp 0.7s ease forwards;
+    animation-delay: 0.08s;
+  }
+
+  .subhead {
+    font-weight: 400;
+    font-size: clamp(15px, 1.6vw, 18px);
+    line-height: 1.55;
+    color: var(--muted-slate);
+    text-align: center;
+    max-width: 46ch;
+    margin-top: 22px;
+    opacity: 0;
+    animation: fadeUp 0.7s ease forwards;
+    animation-delay: 0.16s;
+  }
+
+  /* ---------- chat window (the product, centerpiece) ---------- */
+  .chat {
+    width: 100%;
+    max-width: 720px;
+    margin-top: 52px;
+    height: 440px;
+    background: var(--white);
+    border: 1px solid var(--frost-blue);
+    border-radius: 28px;
+    padding: 24px 24px 22px;
+    box-shadow: 0 50px 100px -40px rgba(28,43,74,0.30);
+    display: flex;
+    flex-direction: column;
+    opacity: 0;
+    animation: fadeUp 0.8s ease forwards;
+    animation-delay: 0.24s;
+  }
+
+  .chat-head {
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    gap: 11px;
+    padding-bottom: 16px;
+    margin-bottom: 8px;
+    border-bottom: 1px solid var(--frost);
+  }
+
+  /* scrolling message thread — old messages scroll up out of view */
+  .thread {
+    flex: 1;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+    padding-right: 8px;
+    padding-top: 4px;
+    scroll-behavior: smooth;
+  }
+  .thread::-webkit-scrollbar { width: 6px; }
+  .thread::-webkit-scrollbar-track { background: transparent; }
+  .thread::-webkit-scrollbar-thumb {
+    background: var(--frost-blue);
+    border-radius: 3px;
+  }
+  .chat-head .dot-live {
+    width: 9px; height: 9px; border-radius: 50%;
+    background: var(--teal);
+    box-shadow: 0 0 0 4px rgba(0,196,180,0.18);
+  }
+  .chat-head .label {
+    font-weight: 600; font-size: 14px; color: var(--muted-slate);
+  }
+
+  .msg-row {
+    display: flex;
+    align-items: flex-end;
+    gap: 13px;
+    opacity: 0;
+    transform: translateY(10px);
+    animation: bubbleIn 0.45s cubic-bezier(.2,.7,.3,1) forwards;
+  }
+
+  .avatar {
+    flex-shrink: 0;
+    width: 42px; height: 42px;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .avatar svg { width: 100%; height: 100%; display: block; }
+
+  .bubble {
+    background: var(--teal);
+    color: var(--white);
+    font-weight: 400;
+    font-size: 18px;
+    line-height: 1.5;
+    padding: 15px 20px;
+    border-radius: 20px 20px 20px 7px;
+    max-width: 88%;
+  }
+  .bubble strong { font-weight: 700; }
+
+  /* user (visitor) messages — right aligned */
+  .msg-row.user { justify-content: flex-end; }
+  .bubble.user {
+    background: var(--frost);
+    color: var(--slate);
+    border: 1px solid var(--frost-blue);
+    border-radius: 20px 20px 7px 20px;
+  }
+
+  .typing { display: flex; align-items: center; gap: 13px; }
+  .typing-bubble {
+    background: var(--frost);
+    border: 1px solid var(--frost-blue);
+    border-radius: 20px 20px 20px 7px;
+    padding: 17px 20px;
+    display: flex; gap: 6px;
+  }
+  .dot {
+    width: 8px; height: 8px; border-radius: 50%;
+    background: var(--muted-slate);
+    animation: blink 1.3s infinite ease-in-out both;
+  }
+  .dot:nth-child(2) { animation-delay: 0.2s; }
+  .dot:nth-child(3) { animation-delay: 0.4s; }
+
+  /* quick-reply suggestion chips */
+  .chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-top: 2px;
+    padding-left: 51px; /* line up with bubbles, past the avatar */
+    opacity: 0;
+    animation: fadeUp 0.5s ease forwards;
+  }
+  .chip {
+    font-family: 'Outfit', sans-serif;
+    font-weight: 600;
+    font-size: 14.5px;
+    color: var(--teal);
+    background: rgba(0,196,180,0.08);
+    border: 1px solid rgba(0,196,180,0.38);
+    border-radius: 999px;
+    padding: 10px 17px;
+    cursor: pointer;
+    transition: background 0.18s ease, transform 0.15s ease;
+  }
+  .chip:hover { background: rgba(0,196,180,0.16); transform: translateY(-1px); }
+
+  /* in-chat call to action */
+  .chat-cta {
+    align-self: flex-start;
+    margin-left: 51px;
+    margin-top: 2px;
+    display: inline-flex; align-items: center; gap: 8px;
+    font-family: 'Outfit', sans-serif;
+    font-weight: 700; font-size: 16px;
+    color: var(--white);
+    background: var(--slate);
+    border: none; border-radius: 14px;
+    padding: 14px 26px;
+    cursor: pointer;
+    opacity: 0; animation: fadeUp 0.5s ease forwards;
+    transition: transform 0.15s ease, background 0.18s ease;
+    box-shadow: 0 16px 30px -14px rgba(28,43,74,0.5);
+  }
+  .chat-cta:hover { background: #16233d; transform: translateY(-2px); }
+  .chat-cta .arrow { transition: transform 0.2s ease; }
+  .chat-cta:hover .arrow { transform: translateX(3px); }
+
+  /* fake input row to make it feel like a real product */
+  .chat-input {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-top: 6px;
+    padding: 14px 18px;
+    background: var(--frost);
+    border: 1px solid var(--frost-blue);
+    border-radius: 16px;
+  }
+  .chat-input span {
+    font-weight: 400; font-size: 16px; color: var(--muted-slate); flex: 1;
+  }
+  .chat-input .send {
+    width: 34px; height: 34px; border-radius: 10px;
+    background: var(--slate); color: var(--white);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 16px;
+  }
+
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(14px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+  @keyframes bubbleIn { to { opacity: 1; transform: translateY(0); } }
+  @keyframes blink {
+    0%, 80%, 100% { opacity: 0.25; transform: scale(0.85); }
+    40% { opacity: 1; transform: scale(1); }
+  }
+
+  @media (max-width: 820px) {
+    .nav-links { display: none; }
+  }
+  @media (max-width: 560px) {
+    .hero { padding: 16px 16px 40px; }
+    .nav { padding: 10px 10px 10px 20px; }
+    .wordmark { font-size: 22px; }
+    .nav-login { display: none; }
+    .chat { padding: 22px 20px 18px; border-radius: 22px; margin-top: 38px; }
+    .bubble { font-size: 16px; }
+  }
+</style>
+</head>
+<body>
+  <section class="hero">
+
+    <canvas id="stitchCanvas" aria-hidden="true"></canvas>
+
+    <nav class="nav">
+      <div class="wordmark">hel<span class="m">m</span>erge</div>
+      <div class="nav-links">
+        <a href="#">How it works</a>
+        <a href="#">Tools</a>
+        <a href="#">Pricing</a>
+      </div>
+      <div class="nav-right">
+        <a href="#" class="nav-login">Log in</a>
+        <button class="nav-cta">Start free</button>
+      </div>
+    </nav>
+
+    <div class="stage">
+      <div class="eyebrow">Where brands are born</div>
+      <h1 class="headline">Your co-partner from zero to first sale</h1>
+      <p class="subhead">helmerge walks with you the whole way — from a vibe in your head to a brand people buy. Not a course. A partner.</p>
+
+      <div class="chat">
+        <div class="chat-head">
+          <span class="dot-live"></span>
+          <span class="label">mergy is online</span>
+        </div>
+        <div class="thread" id="thread">
+          <!-- messages injected by script -->
+        </div>
+      </div>
+    </div>
+  </section>
+
+<script>
+  const chat = document.getElementById('thread');
+  const scrollDown = () => chat.scrollTo({ top: chat.scrollHeight, behavior: 'smooth' });
+
+  const AVATAR = `
+    <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" aria-label="mergy">
+      <rect x="3"  y="36" width="15" height="30" rx="7.5" fill="#1C2B4A"/>
+      <rect x="82" y="36" width="15" height="30" rx="7.5" fill="#1C2B4A"/>
+      <circle cx="50" cy="51" r="39" fill="#00C4B4"/>
+      <rect x="20" y="27" width="60" height="47" rx="22" fill="#11A496"/>
+      <path d="M29 54 L37.5 45 L46 54" fill="none" stroke="#1C2B4A" stroke-width="5.5" stroke-linecap="round" stroke-linejoin="round"/>
+      <path d="M54 54 L62.5 45 L71 54" fill="none" stroke="#1C2B4A" stroke-width="5.5" stroke-linecap="round" stroke-linejoin="round"/>
+    </svg>`;
+
+  const messages = [
+    "Hey, I'm <strong>mergy</strong>. Your co-partner for building a clothing brand from zero.",
+    "I won't just create a roadmap for your brand — I'll walk you through it and be there every step of the way.",
+  ];
+
+  function showTyping(autoScroll = false) {
+    const row = document.createElement('div');
+    row.className = 'msg-row typing';
+    row.innerHTML = `
+      <div class="avatar">${AVATAR}</div>
+      <div class="typing-bubble">
+        <span class="dot"></span><span class="dot"></span><span class="dot"></span>
+      </div>`;
+    chat.appendChild(row);
+    if (autoScroll) scrollDown();
+    return row;
+  }
+
+  function showMessage(html, autoScroll = false) {
+    const row = document.createElement('div');
+    row.className = 'msg-row';
+    row.innerHTML = `
+      <div class="avatar">${AVATAR}</div>
+      <div class="bubble">${html}</div>`;
+    chat.appendChild(row);
+    if (autoScroll) scrollDown();
+  }
+
+  function showUserMessage(text) {
+    const row = document.createElement('div');
+    row.className = 'msg-row user';
+    row.innerHTML = `<div class="bubble user">${text}</div>`;
+    chat.appendChild(row);
+    scrollDown();
+  }
+
+  function showCtaButton() {
+    const btn = document.createElement('button');
+    btn.className = 'chat-cta';
+    btn.type = 'button';
+    btn.innerHTML = `Get started <span class="arrow">→</span>`;
+    chat.appendChild(btn);
+  }
+
+  function showInput() {
+    const el = document.createElement('div');
+    el.className = 'chat-input';
+    el.style.opacity = 0;
+    el.style.animation = 'fadeUp 0.5s ease forwards';
+    el.innerHTML = `<span></span><div class="send">↑</div>`;
+    chat.appendChild(el);
+  }
+
+  const sleep = ms => new Promise(r => setTimeout(r, ms));
+
+  async function play() {
+    await sleep(200);
+    for (let i = 0; i < messages.length; i++) {
+      const typing = showTyping();
+      await sleep(i === 0 ? 350 + messages[i].length * 5 : 1900);
+      typing.remove();
+      showMessage(messages[i]);
+      await sleep(i === 0 ? 1900 : 400);
+    }
+    await sleep(150);
+    showCtaButton();
+    await sleep(300);
+    showInput();
+  }
+
+  play();
+</script>
+
+<script>
+// ── Stitch canvas (static) ────────────────────────────────────────────────────
+(function () {
+  const canvas = document.getElementById('stitchCanvas');
+  const ctx    = canvas.getContext('2d');
+
+  const TOP_SEGS = [
+    [[-20, 95],  [85,  125], [175, 125], [280, 95]],
+    [[280, 95],  [385,  65], [475,  65], [580, 95]],
+    [[580, 95],  [685, 125], [775, 125], [880, 95]],
+    [[880, 95],  [985,  65], [1075, 65], [1180, 95]],
+    [[1180, 95], [1285, 125],[1375, 125],[1480, 95]],
+  ];
+
+  const BOT_SEGS = [
+    [[-20, 770],  [85,  735],  [175, 735],  [280, 770]],
+    [[280, 770],  [385, 805],  [475, 805],  [580, 770]],
+    [[580, 770],  [685, 735],  [775, 735],  [880, 770]],
+    [[880, 770],  [985, 805],  [1075, 805], [1180, 770]],
+    [[1180, 770], [1285, 735], [1375, 735], [1480, 770]],
+  ];
+
+  const DASH = 18, GAP = 24, PERIOD = DASH + GAP;
+
+  function bez([p0,c1,c2,p1], t) {
+    const u = 1-t;
+    return [
+      u*u*u*p0[0]+3*u*u*t*c1[0]+3*u*t*t*c2[0]+t*t*t*p1[0],
+      u*u*u*p0[1]+3*u*u*t*c1[1]+3*u*t*t*c2[1]+t*t*t*p1[1],
+    ];
+  }
+  function bezTan([p0,c1,c2,p1], t) {
+    const u = 1-t;
+    return [
+      3*u*u*(c1[0]-p0[0])+6*u*t*(c2[0]-c1[0])+3*t*t*(p1[0]-c2[0]),
+      3*u*u*(c1[1]-p0[1])+6*u*t*(c2[1]-c1[1])+3*t*t*(p1[1]-c2[1]),
+    ];
+  }
+
+  function buildPath(segs) {
+    const pts = [];
+    let len = 0;
+    for (let i = 0; i <= 3000; i++) {
+      const ft = i / 3000;
+      const si = Math.min(Math.floor(ft * segs.length), segs.length - 1);
+      const lt = ft * segs.length - si;
+      const [x, y]   = bez(segs[si], lt);
+      const [dx, dy] = bezTan(segs[si], lt);
+      if (i > 0) len += Math.hypot(x - pts[i-1].x, y - pts[i-1].y);
+      pts.push({ x, y, angle: Math.atan2(dy, dx), d: len });
+    }
+    return pts;
+  }
+
+  function sample(pts, d) {
+    const max = pts[pts.length - 1].d;
+    d = Math.max(0, Math.min(d, max));
+    let lo = 0, hi = pts.length - 1;
+    while (hi - lo > 1) { const mid = (lo + hi) >> 1; pts[mid].d <= d ? (lo = mid) : (hi = mid); }
+    const a = pts[lo], b = pts[hi];
+    const f = (b.d - a.d) < 1e-6 ? 0 : (d - a.d) / (b.d - a.d);
+    return { x: a.x + (b.x - a.x) * f, y: a.y + (b.y - a.y) * f, angle: a.angle + (b.angle - a.angle) * f };
+  }
+
+  function buildMarks(pts) {
+    const total = pts[pts.length - 1].d;
+    const marks = [];
+    for (let d = DASH; d - DASH * 0.5 <= total; d += PERIOD) marks.push(sample(pts, d - DASH * 0.5));
+    return marks;
+  }
+
+  const topPts   = buildPath(TOP_SEGS);
+  const botPts   = buildPath(BOT_SEGS);
+  const topMarks = buildMarks(topPts);
+  const botMarks = buildMarks(botPts);
+
+
+  function drawMark(m, sx, sy) {
+    const half = DASH * 0.5;
+    const cos = Math.cos(m.angle), sin = Math.sin(m.angle);
+    const x1 = (m.x + cos * half) * sx, y1 = (m.y + sin * half) * sy;
+    const x2 = (m.x - cos * half) * sx, y2 = (m.y - sin * half) * sy;
+    ctx.beginPath(); ctx.moveTo(x1, y1 + 2); ctx.lineTo(x2, y2 + 2);
+    ctx.strokeStyle = 'rgba(28,43,74,0.10)'; ctx.lineWidth = 5; ctx.lineCap = 'butt'; ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(x1, y1); ctx.lineTo(x2, y2);
+    ctx.strokeStyle = 'rgba(0,196,180,0.38)'; ctx.lineWidth = 2.6; ctx.stroke();
+  }
+
+  function drawNeedle(p, sx, sy) {
+    const L = 38, W = 3.4;
+    ctx.save();
+    ctx.translate(p.x * sx, p.y * sy);
+    ctx.rotate(p.angle);
+    ctx.shadowColor = 'rgba(28,43,74,0.20)'; ctx.shadowBlur = 8; ctx.shadowOffsetY = 3;
+    ctx.beginPath();
+    ctx.moveTo( L * sx,         0);
+    ctx.lineTo(-L * 0.74 * sx, -W * sy);
+    ctx.lineTo(-L * 0.91 * sx,  0);
+    ctx.lineTo(-L * 0.74 * sx,  W * sy);
+    ctx.closePath();
+    const g = ctx.createLinearGradient(0, -W * sy, 0, W * sy);
+    g.addColorStop(0,   '#fdfdff');
+    g.addColorStop(.22, '#d6dbe3');
+    g.addColorStop(.5,  '#9aa2b0');
+    g.addColorStop(.78, '#d6dbe3');
+    g.addColorStop(1,   '#f4f6fa');
+    ctx.fillStyle = g; ctx.strokeStyle = '#8b93a1'; ctx.lineWidth = 0.8; ctx.fill(); ctx.stroke();
+    ctx.shadowBlur = 0; ctx.shadowOffsetY = 0;
+    ctx.beginPath(); ctx.moveTo(L * 0.86 * sx, -1.8); ctx.lineTo(-L * 0.60 * sx, -2.8);
+    ctx.strokeStyle = 'rgba(255,255,255,0.9)'; ctx.lineWidth = 1.3; ctx.lineCap = 'round'; ctx.stroke();
+    ctx.beginPath(); ctx.ellipse(-L * 0.55 * sx, 0, 5.5 * sx, 3 * sy, 0, 0, Math.PI * 2);
+    ctx.fillStyle = 'rgba(0,196,180,0.70)'; ctx.fill();
+    ctx.restore();
+  }
+
+  function draw() {
+    const sx = canvas.width  / 1440;
+    const sy = canvas.height / 820;
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    topMarks.forEach(m => drawMark(m, sx, sy));
+    botMarks.forEach(m => drawMark(m, sx, sy));
+
+  }
+
+  function resize() {
+    const r = canvas.parentElement.getBoundingClientRect();
+    canvas.width  = Math.round(r.width);
+    canvas.height = Math.round(r.height);
+    draw();
+  }
+
+  window.addEventListener('resize', resize);
+  resize();
+})();
+</script>
+</body>
+</html>

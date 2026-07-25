@@ -1,0 +1,27 @@
+@import "tailwindcss";
+
+:root {
+  --frost: #F6F8FC;
+  --slate: #1C2B4A;
+  --teal: #00C4B4;
+  --white: #FFFFFF;
+  --frost-blue: #C8D8EC;
+  --muted-slate: #7A8BA8;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  font-family: 'Outfit', sans-serif;
+}
+
+body {
+  background: var(--frost);
+  color: var(--slate);
+  font-family: 'Outfit', sans-serif;
+  -webkit-font-smoothing: antialiased;
+}

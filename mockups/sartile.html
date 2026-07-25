@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>sartile — wordmark</title>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --frost: #F6F8FC;
+    --slate: #1C2B4A;
+    --teal: #00C4B4;
+    --muted: #7A8BA8;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: 'Outfit', sans-serif;
+    background: var(--frost);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 64px;
+    padding: 80px 40px;
+  }
+
+  .row {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+  }
+  .label {
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+
+  .wm {
+    font-weight: 700;
+    font-size: 48px;
+    letter-spacing: -0.025em;
+    color: var(--slate);
+  }
+
+  .dark-bg {
+    background: var(--slate);
+    padding: 32px 56px;
+    border-radius: 20px;
+  }
+  .wm-dark {
+    font-weight: 700;
+    font-size: 48px;
+    letter-spacing: -0.025em;
+    color: #fff;
+  }
+
+  /* divider */
+  .divider {
+    width: 1px;
+    height: 40px;
+    background: #C8D8EC;
+  }
+</style>
+</head>
+<body>
+
+  <div class="row">
+    <span class="label">Light</span>
+    <span class="wm">sartile</span>
+  </div>
+
+  <div class="divider"></div>
+
+  <div class="row">
+    <span class="label">Dark</span>
+    <div class="dark-bg">
+      <span class="wm-dark">sartile</span>
+    </div>
+  </div>
+
+</body>
+</html>
